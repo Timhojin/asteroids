@@ -10,6 +10,8 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.time = 0
+        self.shield_time = 0
+        self.shield = False
 
 
     def triangle(self):
@@ -21,13 +23,21 @@ class Player(CircleShape):
         return [a, b, c]
     
     def draw(self, screen):
-        pygame.draw.polygon(screen, "white", self.triangle(), 2)
+        if self.shield_time > 0:
+            pygame.draw.polygon(screen, "red", self.triangle(), 2)
+        else:
+            pygame.draw.polygon(screen, "white", self.triangle(), 2)
 
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
     
     def update(self, dt):
         self.time -= dt
+        if self.shield_time > 0:
+            self.shield_time -= dt
+        else:
+            self.shield = False
+            self.radius = PLAYER_RADIUS
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
@@ -55,3 +65,15 @@ class Player(CircleShape):
         shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
 
         self.time = PLAYER_SHOOT_COOLDOWN
+
+    def revive(self):
+        self.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.radius *= 3
+        self.shield = True
+        self.shield_time = 3
+    
+    def check_shield(self, asteroid):
+        if self.shield:
+            asteroid.kill()
+            return True
+        return False

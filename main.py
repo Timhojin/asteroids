@@ -28,9 +28,9 @@ def main():
     asteroid_field = AsteroidField()
     Shot.containers = (shots, updatable, drawable)
 
-    score = 0
+    score, lives = 0, 3
     font = pygame.font.Font(None, 32)
-    text = font.render(f"Current score: {score}", True, "white", None)
+    text = font.render(f"Current score: {score}   Lives: {lives}", True, "white", None)
     textRect = text.get_rect()
     textRect.center = (x, 15)
 
@@ -39,7 +39,7 @@ def main():
             if event.type == pygame.QUIT:
                 return
         screen.fill("black")
-        text = font.render(f"Current score: {score}", True, "white", None)
+        text = font.render(f"Current score: {score}   Lives: {lives}", True, "white", None)
         
         screen.blit(text, textRect)
 
@@ -51,6 +51,13 @@ def main():
                     asteroid.split()
                     score += 1
             if player.collisionCheck(asteroid):
+                if player.check_shield(asteroid):
+                    continue
+                if lives > 1:
+                    player.revive()
+                    lives -= 1
+                    player.position = pygame.Vector2(x, y)
+                    continue
                 print("Game Over!")
                 print(f"Your final score: {score}")
                 return
